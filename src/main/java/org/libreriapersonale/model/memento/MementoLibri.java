@@ -4,21 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-// undo . . .. Gestore stati libreria java. Mi serve per fixare il memento in Libreria Manager
-// IL CARETAKER DEI COMANDI LO METTO NEL COMMANDHISTORY
-
-
-//da rivedere anche la libreria in sé che in principio era un array tipo, ma non 'ho ancora fatto
-//poi manca command e vabbe la view
-
-
-
-/*
-Ogni modifica (aggiungi, elimina, modifica, setLibri) salva prima lo stato corrente in history.
-Con undo() ripristini l’intera lista di libri allo stato precedente.
-È un undo globale, semplice da implementare e mantenere.
- */
-
 import org.libreriapersonale.model.libro.Libro;
 
 
