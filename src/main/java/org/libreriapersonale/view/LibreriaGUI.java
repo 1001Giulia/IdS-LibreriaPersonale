@@ -73,7 +73,7 @@ public class LibreriaGUI extends JFrame implements Observer {
 
         // SX: parte per aggiungere/modificare
         JPanel editPanel = createPanel();
-        editPanel.setMinimumSize(new Dimension(260, 400));
+        editPanel.setMinimumSize(new Dimension(280, 400));
         splitPane.setLeftComponent(editPanel);
         // DX: Tabella con i libri
         JPanel tablePanel = createTablePanel();
@@ -245,7 +245,7 @@ public class LibreriaGUI extends JFrame implements Observer {
         panel.add(ratingPanel, gbc);
 
         gbc.gridx = 2;
-        filtroAndCheckbox = new JCheckBox("Tutti i filtri (AND)");
+        filtroAndCheckbox = new JCheckBox("Tutti i filtri");
         filtroAndCheckbox.setSelected(true);
         panel.add(filtroAndCheckbox, gbc);
 
@@ -306,7 +306,7 @@ public class LibreriaGUI extends JFrame implements Observer {
         fieldsPanel.add(new JLabel("Genere:"), gbc);
         gbc.gridx = 1;
         genereCombo = new JComboBox<>(Genere.values());
-        genereCombo.setPreferredSize(new Dimension(168,25));
+        genereCombo.setPreferredSize(new Dimension(140,25));
         genereCombo.setSelectedItem(Genere.ALTRO);
         /*genereCombo = new JComboBox<>(); per averlo vuoto senza val di default
         genereCombo.addItem(null);
@@ -323,7 +323,7 @@ public class LibreriaGUI extends JFrame implements Observer {
         gbc.gridx = 1;
         statoCombo = new JComboBox<>(StatoLettura.values());
         statoCombo.setSelectedItem(StatoLettura.READING);
-        statoCombo.setPreferredSize(new Dimension(168,25));
+        statoCombo.setPreferredSize(new Dimension(140,25));
         fieldsPanel.add(statoCombo, gbc);
 
         // Rating
@@ -622,7 +622,7 @@ public class LibreriaGUI extends JFrame implements Observer {
         genereCombo.setSelectedItem(tableModel.getValueAt(row, 3));
         statoCombo.setSelectedItem(tableModel.getValueAt(row, 4));
 
-        // Carica rating nello slider
+        // Carica rating sullo slider del rating
         Object ratingObj = tableModel.getValueAt(row, 5);
         if (ratingObj instanceof Number) {
             double rating = ((Number) ratingObj).doubleValue();
@@ -652,7 +652,7 @@ public class LibreriaGUI extends JFrame implements Observer {
     }
 
     private void modificaLibro() {
-        int selectedRow = table.getSelectedRow(); //ho tolto il bottone sempre visibile ma lo lascio per sicurezza you never know
+        int selectedRow = table.getSelectedRow(); // Ho tolto il bottone sempre visibile ma lo lascio per sicurezza you never know
         if (selectedRow < 0) {
             JOptionPane.showMessageDialog(this, "Seleziona un libro da modificare.",
                     "Nessuna Selezione", JOptionPane.WARNING_MESSAGE);
@@ -692,7 +692,7 @@ public class LibreriaGUI extends JFrame implements Observer {
                 "Conferma Eliminazione", JOptionPane.YES_NO_OPTION);
 
         if (conferma == JOptionPane.YES_OPTION) {
-            // Converti l'indice della vista nell'indice del modello
+            //TODO Indice vista -> indice modello
             int modelRow = table.convertRowIndexToModel(selectedRow);
             String isbn = (String) tableModel.getValueAt(modelRow, 2);
             Libro libro = manager.cercaPerIsbn(isbn);
@@ -709,17 +709,16 @@ public class LibreriaGUI extends JFrame implements Observer {
         autoreField.setText("");
         isbnField.setText("");
         genereCombo.setSelectedItem(Genere.ALTRO);
-        statoCombo.setSelectedItem(StatoLettura.PLANTOREAD);
+        statoCombo.setSelectedItem(StatoLettura.READING);
         ratingSlider.setValue(0);
-        ratingLabel.setText("0.0 ★");
+        ratingLabel.setText("0/5");
         table.clearSelection();
-
-        // Nascondi i bottoni modifica ed elimina
+        // Nascondi i bottoni
         editButton.setVisible(false);
         deleteButton.setVisible(false);
     }
 
-    // Implementazione Observer
+    // Observer
     @Override
     public void update() {
         // Salva la lista completa dei libri
