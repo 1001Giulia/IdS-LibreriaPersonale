@@ -593,7 +593,7 @@ public class LibreriaGUI extends JFrame implements Observer {
 
         stats.append("Per stato di lettura:\n");
         for (int i = 0; i < StatoLettura.values().length; i++) {
-            stats.append("• ").append(StatoLettura.values()[i]).append(": ").append(cont[i]).append("\n");
+            stats.append("- ").append(StatoLettura.values()[i]).append(": ").append(cont[i]).append("\n");
         }
 
         stats.append("\nRating medio: ").append(String.format("%.2f", ratingMedio));
