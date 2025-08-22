@@ -441,15 +441,15 @@ public class LibreriaGUI extends JFrame implements Observer {
     }
 
     private void apriFinestraFiltri() {
-        // Crea la finestra di dialogo per i filtri
+        // Creaz finestra per i filtri
         JDialog filtroDialog = new JDialog(this, "Filtri Avanzati", true);
         filtroDialog.setLayout(new BorderLayout());
 
-        // Contenuto della finestra
+        // Contenuto finestra
         JPanel filtroPanel = createFiltroPanel();
         filtroDialog.add(filtroPanel, BorderLayout.CENTER);
 
-        // Bottoni della finestra
+        // Pulsanti della finestra
         JPanel buttonPanel = new JPanel(new FlowLayout());
         JButton okButton = new JButton("OK");
         okButton.addActionListener(e -> {
@@ -471,8 +471,7 @@ public class LibreriaGUI extends JFrame implements Observer {
 
     private void applicaFiltri() {
         List<Filtro> filtri = new ArrayList<>();
-
-        // Filtro per titolo (usando il filtro autore ma per il titolo)
+        //TODO Filtro per titolo (usando il filtro autore ma per il titolo)
         String titolo = filtroTitoloField.getText().trim();
         if (!titolo.isEmpty()) {
             filtri.add(new Filtro() {
@@ -541,7 +540,6 @@ public class LibreriaGUI extends JFrame implements Observer {
             filtroRatingLabel.setText("0/5");
             filtroAndCheckbox.setSelected(true);
         }
-
         // Mostra i libri
         filtriaAttivi = false;
         aggiornaTabella(libriCompleti);
@@ -568,26 +566,25 @@ public class LibreriaGUI extends JFrame implements Observer {
 
         int[] cont = new int[StatoLettura.values().length];
         double ratingMedio = 0;
-        int libriConRating = 0;
+        int libriRatati = 0;
 
         for (Libro libro : libri) {
-            //Conta per stato
+            // Conta per stato
             for (int i = 0; i < StatoLettura.values().length; i++) {
                 if (libro.getStatoLettura() == StatoLettura.values()[i]) {
                     cont[i]++;
                     break;
                 }
             }
-
-            // Calcola rating medio
+            // Rating medio
             if (libro.getRating() > 0) {
                 ratingMedio += libro.getRating();
-                libriConRating++;
+                libriRatati++;
             }
         }
 
-        if (libriConRating > 0) {
-            ratingMedio /= libriConRating;
+        if (libriRatati > 0) {
+            ratingMedio /= libriRatati;
         }
 
         StringBuilder stats = new StringBuilder();
@@ -599,7 +596,7 @@ public class LibreriaGUI extends JFrame implements Observer {
             stats.append("• ").append(StatoLettura.values()[i]).append(": ").append(cont[i]).append("\n");
         }
 
-        stats.append("\nRating medio: ").append(String.format("%.2f", ratingMedio)).append(" ★");
+        stats.append("\nRating medio: ").append(String.format("%.2f", ratingMedio));
 
         JOptionPane.showMessageDialog(this, stats.toString(), "Statistiche", JOptionPane.INFORMATION_MESSAGE);
     }
@@ -611,7 +608,6 @@ public class LibreriaGUI extends JFrame implements Observer {
                 "Matricola: 239588\n\n\n" +
                 "Progetto di Ingegneria del Software\n" +
                 "AA 2024-2025";
-
         JOptionPane.showMessageDialog(this, info, "Informazioni", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -658,7 +654,6 @@ public class LibreriaGUI extends JFrame implements Observer {
                     "Nessuna Selezione", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
         try {
             Libro libro = new Libro.Builder()
                     .titolo(titoloField.getText().trim())
@@ -686,7 +681,7 @@ public class LibreriaGUI extends JFrame implements Observer {
             return;
         }
 
-        // Conferma eliminazione
+        // Conferma eliminaz
         int conferma = JOptionPane.showConfirmDialog(this,
                 "Sei sicuro di voler eliminare questo libro?",
                 "Conferma Eliminazione", JOptionPane.YES_NO_OPTION);
@@ -723,8 +718,7 @@ public class LibreriaGUI extends JFrame implements Observer {
     public void update() {
         // Salva la lista completa dei libri
         libriCompleti = new ArrayList<>(manager.getLibri());
-
-        // Se non ci sono filtri attivi, aggiorna normalmente
+        // No filtri attivi -> aggiorna normalmente
         if (!filtriaAttivi) {
             aggiornaTabella(libriCompleti);
         } else {
@@ -733,7 +727,7 @@ public class LibreriaGUI extends JFrame implements Observer {
         }
     }
 
-    // Main per testare
+    // test
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             new LibreriaGUI().setVisible(true);
