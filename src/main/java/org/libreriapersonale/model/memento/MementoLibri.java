@@ -3,7 +3,6 @@ package org.libreriapersonale.model.memento;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import org.libreriapersonale.model.libro.Libro;
 
 

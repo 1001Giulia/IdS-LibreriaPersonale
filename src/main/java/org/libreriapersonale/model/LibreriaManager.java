@@ -95,6 +95,25 @@ public class LibreriaManager implements Observable {
     }
 */
 
+    // PATTERN OSBERVER
+
+    @Override
+    public void addObserver(Observer o) {
+        observers.add(o);
+    }
+
+    @Override
+    public void removeObserver(Observer o) {
+        observers.remove(o);
+    }
+
+    @Override
+    public void notifyObservers() {
+        for (Observer o : observers) {
+            o.update();
+        }
+    }
+
     // UNDO GLOBALE
     private void salvaStato() {
         undohistory.push(new MementoLibri(libri));
@@ -245,24 +264,6 @@ public class LibreriaManager implements Observable {
         notifyObservers();
     }*/
 
-    // PATTERN OSBERVER
-
-    @Override
-    public void addObserver(Observer o) {
-        observers.add(o);
-    }
-
-    @Override
-    public void removeObserver(Observer o) {
-        observers.remove(o);
-    }
-
-    @Override
-    public void notifyObservers() {
-        for (Observer o : observers) {
-            o.update();
-        }
-    }
 
 
     /*
@@ -337,34 +338,5 @@ class GuiObserver implements Observer {
     }
 }
 
-// Observer per le statistiche
-class StatisticheObserver implements Observer {
-    private final GestoreLibreria gestore;
 
-    public StatisticheObserver(GestoreLibreria gestore) {
-        this.gestore = gestore;
-    }
-
-    @Override
-    public void update() {
-        List<Libro> libri = gestore.getLibri();
-        int totale = libri.size();
-
-        int letti = 0, daLeggere = 0, inLettura = 0;
-        for (Libro libro : libri) {
-            switch (libro.getStatoLettura()) {
-                case LETTO: letti++; break;
-                case DA_LEGGERE: daLeggere++; break;
-                case IN_LETTURA: inLettura++; break;
-            }
-        }
-
-        System.out.println("=== STATISTICHE ===");
-        System.out.println("Totale: " + totale);
-        System.out.println("Letti: " + letti);
-        System.out.println("Da leggere: " + daLeggere);
-        System.out.println("In lettura: " + inLettura);
-        System.out.println("==================");
-    }
-}
 */
