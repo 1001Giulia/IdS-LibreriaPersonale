@@ -6,7 +6,7 @@ import org.libreriapersonale.model.observer.Observable;
 import org.libreriapersonale.model.observer.Observer;
 import org.libreriapersonale.model.repository.LibroRepository;
 
-import java.util.*; //TODO da controllare tutto
+import java.util.*;
 
 public class LibreriaManager implements Observable {
 

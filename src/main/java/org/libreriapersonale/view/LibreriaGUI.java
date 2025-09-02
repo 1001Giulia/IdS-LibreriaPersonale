@@ -16,7 +16,7 @@ import java.util.List;
 
 public class LibreriaGUI extends JFrame implements Observer {
 
-    private LibreriaManager manager;
+    private final LibreriaManager manager;
     private DefaultTableModel tableModel;
     private JTable table;
     private TableRowSorter<DefaultTableModel> tableSorter;
