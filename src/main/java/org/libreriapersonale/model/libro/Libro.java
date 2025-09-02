@@ -29,19 +29,18 @@ public class Libro {
     public void setRating(double rating) { this.rating = rating; }
     public void setStatoLettura(StatoLettura statoLettura) { this.statoLettura = statoLettura; }
 
-    /* MEMENTO era per undo singolo ma ho fatto undo globale
-    public delLibroMemento createMemento() {
-        return new delLibroMemento(titolo, autore, isbn, genere, rating, statoLettura);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Libro)) return false;
+        Libro libro = (Libro) o;
+        return isbn.equals(libro.isbn);
     }
 
-    public void restoreFromMemento(delLibroMemento memento) {
-        this.titolo = memento.getTitolo();
-        this.autore = memento.getAutore();
-        this.isbn = memento.getIsbn();
-        this.genere = memento.getGenere();
-        this.rating = memento.getRating();
-        this.statoLettura = memento.getStatoLettura();
-    }*/
+    @Override
+    public int hashCode() {
+        return isbn.hashCode();
+    }
 
     // BUILDER PATTERN
     public static class Builder {
@@ -73,11 +72,7 @@ public class Libro {
 }
 
 
-
-
-
-
-        /* faccio controllo in build. Più fcile per modifiche successive ngl
+        /* faccio controllo in build
         public Builder(String titolo, String autore, String isbn) {
             this.titolo = titolo;
             this.autore = autore;

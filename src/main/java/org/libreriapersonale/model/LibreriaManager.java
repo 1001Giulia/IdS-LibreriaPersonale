@@ -33,67 +33,6 @@ public class LibreriaManager implements Observable {
         }
     }
 
-    /* undo x libro ma cambiato per undo globale. Ogni libro non più un originator che sa reastaurare il proprio memento
-    // ================================
-    // METODI CON COMANDI
-    // ================================
-    public void eseguiComando(Command c) {
-        history.esegui(c);
-        notifyObservers();
-    }
-
-    public void undo() {
-        history.undo();
-        notifyObservers();
-    }
-
-    public void redo() {
-        history.redo();
-        notifyObservers();
-    }
-*/
-
-/*
-    // ================================
-    // OPERAZIONI PRINCIPALI
-    // ================================
-
-    public void aggiungiLibro(Libro libro) {
-        try {
-            repository.salva(Arrays.asList(libro));
-            libri.add(libro);
-            notifyObservers();
-        } catch (Exception e) {
-            System.err.println("Errore aggiunta libro al database.");
-        }
-    }
-
-    public void eliminaLibro(Libro libro) {
-        if (libri.remove(libro)) {
-            try {
-                repository.salva(libri);
-                notifyObservers();
-            } catch (Exception e) {
-                System.err.println("Errore eliminazione libro dal database");
-            }
-        }
-    }
-
-    public void modificaLibro(Libro libro) {
-        try {
-            repository.salva(libri); // Salva tutto
-            for (int i = 0; i < libri.size(); i++) {
-                if (libri.get(i).getIsbn().equals(libro.getIsbn())) {
-                    libri.set(i, libro);
-                    notifyObservers();
-                    return;
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Errore modifica libro.");
-        }
-    }
-*/
 
     // PATTERN OSBERVER
 
@@ -151,7 +90,6 @@ public class LibreriaManager implements Observable {
     }
 
 
-
     // CRUD
     public void aggiungiLibro(Libro libro) {
         salvaStato();
@@ -178,23 +116,36 @@ public class LibreriaManager implements Observable {
 
     public void modificaLibro(Libro nuovo) {
         salvaStato();
+        boolean found = false;
         for (int i = 0; i < libri.size(); i++) {
             if (libri.get(i).getIsbn().equals(nuovo.getIsbn())) {
                 libri.set(i, nuovo);
-                try {
-                    repository.salva(libri); //todo spostare il trycatch sotto il ciclo? e mettere un break dopo ogni set ? maybe not
-                    notifyObservers();
-                } catch (Exception e) {
-                    System.err.println("Errore modifica libro.");
-                }
-                return;
+                found = true;
+                break;
+            }
+        }
+        if (found) {
+            try {
+                repository.salva(libri);
+                notifyObservers();
+            } catch (Exception e) {
+                System.err.println("Errore modifica libro.");
             }
         }
     }
-    //fare un metodo di salvataggio privato per non scrivere tutte le volte try catch (?)
+
+    // fare un metodo di salvataggio privato per non scrivere tutte le volte try catch (?)
+
+    /* in caso si può fare una cosa del genere al posto delle string ogni volta ma vabbe
+    private void msgErrore(String op, Exception e) {
+        String mes = "Errore durante " + op + ": " + e.getMessage();
+        System.err.println(mes);
+    }
+    */
 
 
     // RICERCA LIBRI
+    /* sostituiti con strategy
     public List<Libro> cercaPerTitolo(String titolo) {
         List<Libro> ret = new ArrayList<>();
         for (Libro libro : libri) {
@@ -214,6 +165,8 @@ public class LibreriaManager implements Observable {
         }
         return ret;
     }
+    */
+
 
     public Libro cercaPerIsbn(String isbn) {
         for (Libro libro : libri) {
@@ -233,17 +186,7 @@ public class LibreriaManager implements Observable {
     public void setLibri(List<Libro> nuoviLibri) {
         salvaStato();
         libri.clear();
-        libri.addAll(nuoviLibri);
-        try {
-            repository.salva(libri);
-        } catch (Exception e) {
-            System.err.println("Errore nel salvataggio.");
-        }
-        notifyObservers();
-    }
-    /*
-    public void setLibri(List<Libro> nuoviLibri) {
-        libri.clear();
+        //libri.addAll(nuoviLibri);
         for (Libro l : nuoviLibri) {
             // copia x sicurezza
             Libro copia = new Libro.Builder()
@@ -255,88 +198,16 @@ public class LibreriaManager implements Observable {
                     .statoLettura(l.getStatoLettura())
                     .build();
             libri.add(copia);
+            try {
+                repository.salva(libri);
+            } catch (Exception e) {
+                System.err.println("Errore nel salvataggio.");
+            }
+            notifyObservers();
         }
-        try {
-            repository.salva(libri);
-        } catch (Exception e) {
-            System.err.println("Errore nel salvataggio.");
-        }
-        notifyObservers();
-    }*/
 
-
-
-    /*
-    public delLibroMemento save() {
-        List<Libro> copiaStato = new ArrayList<>();
-        for (Libro libro : this.libri) {
-            Libro copia = new Libro.Builder()
-                    .titolo(libro.getTitolo())
-                    .autore(libro.getAutore())
-                    .isbn(libro.getIsbn())
-                    .genere(libro.getGenere())
-                    .rating(libro.getRating())
-                    .statoLettura(libro.getStatoLettura())
-                    .build();
-            copiaStato.add(copia);
-        }
-        return new delLibroMemento(copiaStato);
-    }
-
-    public void restore(delLibroMemento m) {
-        this.libri.clear();
-        for (Libro libro : m.getStato()) {
-            Libro copia = new Libro.LibroBuilder()
-                    .titolo(libro.getTitolo())
-                    .autore(libro.getAutore())
-                    .isbn(libro.getIsbn())
-                    .genere(libro.getGenere())
-                    .valutazione(libro.getValutazione())
-                    .statoLettura(libro.getStatoLettura())
-                    .build();
-            this.libri.add(copia);
-        }
-        sincronizzaRepositoryMemoria();
-        notifyObservers();
-    }
-*/
-
-
-
-
-}
-
-/*
-// ================================
-// OBSERVER CONCRETI SEMPLICI
-// ================================
-
-// Observer per la GUI
-class GuiObserver implements Observer {
-    private final GestoreLibreria gestore;
-    private final javax.swing.table.DefaultTableModel tableModel;
-
-    public GuiObserver(GestoreLibreria gestore, javax.swing.table.DefaultTableModel tableModel) {
-        this.gestore = gestore;
-        this.tableModel = tableModel;
-    }
-
-    @Override
-    public void update() {
-        // Aggiorna la tabella
-        tableModel.setRowCount(0);
-        for (Libro libro : gestore.getLibri()) {
-            Object[] row = {
-                    libro.getTitolo(),
-                    libro.getAutore(),
-                    libro.getGenere(),
-                    libro.getStatoLettura(),
-                    libro.getValutazione()
-            };
-            tableModel.addRow(row);
-        }
     }
 }
 
 
-*/
+

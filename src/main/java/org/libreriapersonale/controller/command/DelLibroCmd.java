@@ -4,7 +4,7 @@ import org.libreriapersonale.model.LibreriaManager;
 import org.libreriapersonale.model.libro.Libro;
 
 public class DelLibroCmd implements Command{
-    private final LibreriaManager manager; //final entrambi?
+    private final LibreriaManager manager;
     private final Libro libro;
 
     public DelLibroCmd(LibreriaManager manager, Libro libro) {
@@ -16,10 +16,4 @@ public class DelLibroCmd implements Command{
     public void esegui() {
         manager.eliminaLibro(libro);
     }
-
-    /*
-    @Override
-    public void undo() {
-        manager.aggiungiLibro(libro);
-    }*/
 }

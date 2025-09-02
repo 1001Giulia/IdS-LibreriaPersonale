@@ -10,7 +10,7 @@ public class MementoLibri {
     private final List<Libro> libri;
 
     public MementoLibri(List<Libro> libri) {
-        // copia profonda
+        // Copia profonda
         this.libri = new ArrayList<>();
         for (Libro l : libri) {
             this.libri.add(new Libro.Builder()
@@ -25,7 +25,7 @@ public class MementoLibri {
     }
 
     public List<Libro> getLibri() {
-        // Ritorna una copia per sicurezza
+        // Copia profonda
         List<Libro> copia = new ArrayList<>();
         for (Libro l : libri) {
             copia.add(new Libro.Builder()

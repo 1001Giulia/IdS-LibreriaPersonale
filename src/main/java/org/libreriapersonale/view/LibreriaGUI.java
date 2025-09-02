@@ -187,7 +187,8 @@ public class LibreriaGUI extends JFrame implements Observer {
         gbc.anchor = GridBagConstraints.WEST;
 
         //Prima riga - Titolo e Autore
-        gbc.gridx = 0; gbc.gridy = 0;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
         panel.add(new JLabel("Titolo:"), gbc);
         gbc.gridx = 1;
         filtroTitoloField = new JTextField(10);
@@ -200,7 +201,8 @@ public class LibreriaGUI extends JFrame implements Observer {
         panel.add(filtroAutoreField, gbc);
 
         // Seconda riga - Genere e Stato
-        gbc.gridx = 0; gbc.gridy = 1;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
         panel.add(new JLabel("Genere:"), gbc);
         gbc.gridx = 1;
         filtroGenereCombo = new JComboBox<>();
@@ -221,7 +223,8 @@ public class LibreriaGUI extends JFrame implements Observer {
         panel.add(filtroStatoCombo, gbc);
 
         // Terza riga - Rating e controlli
-        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
         panel.add(new JLabel("Rating min:"), gbc);
         gbc.gridx = 1;
 
@@ -233,7 +236,7 @@ public class LibreriaGUI extends JFrame implements Observer {
 
         filtroRatingSlider.addChangeListener(e -> {
             double rating = filtroRatingSlider.getValue() / 2.0;
-            if (rating == (int) rating) { //se intero
+            if (rating == (int) rating) { // se intero
                 filtroRatingLabel.setText(String.format("%d/5", (int) rating));
             } else {
                 filtroRatingLabel.setText(String.format("%.1f/5", rating));
@@ -306,7 +309,7 @@ public class LibreriaGUI extends JFrame implements Observer {
         fieldsPanel.add(new JLabel("Genere:"), gbc);
         gbc.gridx = 1;
         genereCombo = new JComboBox<>(Genere.values());
-        genereCombo.setPreferredSize(new Dimension(140,25));
+        genereCombo.setPreferredSize(new Dimension(140, 25));
         genereCombo.setSelectedItem(Genere.ALTRO);
         /*genereCombo = new JComboBox<>(); per averlo vuoto senza val di default
         genereCombo.addItem(null);
@@ -323,7 +326,7 @@ public class LibreriaGUI extends JFrame implements Observer {
         gbc.gridx = 1;
         statoCombo = new JComboBox<>(StatoLettura.values());
         statoCombo.setSelectedItem(StatoLettura.READING);
-        statoCombo.setPreferredSize(new Dimension(140,25));
+        statoCombo.setPreferredSize(new Dimension(140, 25));
         fieldsPanel.add(statoCombo, gbc);
 
         // Rating
@@ -413,12 +416,10 @@ public class LibreriaGUI extends JFrame implements Observer {
         table.setRowSorter(tableSorter);
 
 
-        //TODO AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-        // Quando selezioni una riga load data nel form
-        table.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                int selectedRow = table.getSelectedRow();
-                if (selectedRow >= 0) {
+        table.getSelectionModel().addListSelectionListener(e -> { // Listener alla selezione della JTable
+            if (!e.getValueIsAdjusting()) { // evita doppie chiamate              // Selection model gestisce quale riga è selez
+                int selectedRow = table.getSelectedRow();                         // Quando cambia la selezione viene eseguito questo blocco
+                if (selectedRow >= 0) { // Con questo verifico se qualcosa è stato selezionato (table.get.. res -1 se non c'è selez)
                     // Converti l'indice della vista nell'indice del modello
                     int modelRow = table.convertRowIndexToModel(selectedRow);
                     caricaDatiNelForm(modelRow);
@@ -471,16 +472,10 @@ public class LibreriaGUI extends JFrame implements Observer {
 
     private void applicaFiltri() {
         List<Filtro> filtri = new ArrayList<>();
-        //TODO Filtro per titolo (usando il filtro autore ma per il titolo)
+
         String titolo = filtroTitoloField.getText().trim();
         if (!titolo.isEmpty()) {
-            filtri.add(new Filtro() {
-                @Override
-                public boolean filtra(Libro libro) {
-                    return libro.getTitolo() != null &&
-                            libro.getTitolo().toLowerCase().contains(titolo.toLowerCase());
-                }
-            });
+            filtri.add(new FiltroTitolo(titolo));
         }
 
         String autore = filtroAutoreField.getText().trim();
@@ -564,13 +559,14 @@ public class LibreriaGUI extends JFrame implements Observer {
         List<Libro> libri = manager.getLibri();
         int totale = libri.size();
 
-        int[] cont = new int[StatoLettura.values().length];
+        int n = StatoLettura.values().length;
+        int[] cont = new int[n];
         double ratingMedio = 0;
         int libriRatati = 0;
 
         for (Libro libro : libri) {
             // Conta per stato
-            for (int i = 0; i < StatoLettura.values().length; i++) {
+            for (int i = 0; i < n; i++) {
                 if (libro.getStatoLettura() == StatoLettura.values()[i]) {
                     cont[i]++;
                     break;
@@ -588,11 +584,9 @@ public class LibreriaGUI extends JFrame implements Observer {
         }
 
         StringBuilder stats = new StringBuilder();
-        stats.append("STATISTICHE LIBRERIA\n\n");
         stats.append("Totale libri: ").append(totale).append("\n\n");
 
-        stats.append("Per stato di lettura:\n");
-        for (int i = 0; i < StatoLettura.values().length; i++) {
+        for (int i = 0; i < n; i++) {
             stats.append("- ").append(StatoLettura.values()[i]).append(": ").append(cont[i]).append("\n");
         }
 
@@ -602,12 +596,16 @@ public class LibreriaGUI extends JFrame implements Observer {
     }
 
     private void mostraInformazioni() {
-        String info = "Libreria Personale\n\n" +
-                "Versione: 1.0\n" +
-                "Studente: Giulia Pignanelli\n" +
-                "Matricola: 239588\n\n\n" +
-                "Progetto di Ingegneria del Software\n" +
-                "AA 2024-2025";
+        String info = """
+                Libreria Personale
+                
+                Versione: 1.0
+                Studente: Giulia Pignanelli
+                Matricola: 239588
+                
+                
+                Progetto di Ingegneria del Software
+                AA 2024-2025""";
         JOptionPane.showMessageDialog(this, info, "Informazioni", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -681,14 +679,14 @@ public class LibreriaGUI extends JFrame implements Observer {
             return;
         }
 
-        // Conferma eliminaz
+        // Conferma eliminazione
         int conferma = JOptionPane.showConfirmDialog(this,
                 "Sei sicuro di voler eliminare questo libro?",
                 "Conferma Eliminazione", JOptionPane.YES_NO_OPTION);
 
         if (conferma == JOptionPane.YES_OPTION) {
-            //TODO Indice vista -> indice modello
-            int modelRow = table.convertRowIndexToModel(selectedRow);
+            // Indice vista -> indice modello
+            int modelRow = table.convertRowIndexToModel(selectedRow); // selectedRow id della riga visibile nella tab, converto all'id del dato reale
             String isbn = (String) tableModel.getValueAt(modelRow, 2);
             Libro libro = manager.cercaPerIsbn(isbn);
             if (libro != null) {
@@ -708,7 +706,7 @@ public class LibreriaGUI extends JFrame implements Observer {
         ratingSlider.setValue(0);
         ratingLabel.setText("0/5");
         table.clearSelection();
-        // Nascondi i bottoni
+        // Nascondi bottoni
         editButton.setVisible(false);
         deleteButton.setVisible(false);
     }
@@ -727,10 +725,12 @@ public class LibreriaGUI extends JFrame implements Observer {
         }
     }
 
-    // test
+
+    /*
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             new LibreriaGUI().setVisible(true);
         });
     }
+    */
 }

@@ -3,7 +3,7 @@ package org.libreriapersonale.model.strategy;
 import org.libreriapersonale.model.libro.*;
 
 public class FiltroStatoLettura implements Filtro{
-    private StatoLettura stato;
+    private final StatoLettura stato;
 
     public FiltroStatoLettura(StatoLettura stato) {
         this.stato = stato;

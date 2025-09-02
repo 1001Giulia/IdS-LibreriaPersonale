@@ -17,10 +17,5 @@ public class AddLibroCmd implements Command {
     public void esegui() {
         manager.aggiungiLibro(libro); //il receiver sa come fare
     }
-/*
-    @Override
-    public void undo() {
-        manager.eliminaLibro(libro);
-    }*/
 
 }

@@ -17,7 +17,7 @@ public class JsonLibroRepository implements LibroRepository {
     public JsonLibroRepository(String filename) {
         this.filename = filename;
         this.gson = new GsonBuilder()
-                .setPrettyPrinting() //scrive il JSON formatttato
+                .setPrettyPrinting() // scrive il JSON formatttato
                 .create();
     }
 
