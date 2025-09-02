@@ -92,45 +92,7 @@ public class LibreriaGUI extends JFrame implements Observer {
 
     private JMenuBar createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
-        /*
-        // Menu File
-        JMenu fileMenu = new JMenu("File");
-
-        JMenuItem nuovoMenuItem = new JMenuItem("Nuovo");
-        nuovoMenuItem.setAccelerator(KeyStroke.getKeyStroke("ctrl N"));
-        nuovoMenuItem.addActionListener(e -> azzeraCampi());
-
-        JMenuItem salvaMenuItem = new JMenuItem("Salva");
-        salvaMenuItem.setAccelerator(KeyStroke.getKeyStroke("ctrl S"));
-        salvaMenuItem.addActionListener(e -> {
-            try {
-                // Il salvataggio avviene già automaticamente nelle operazioni CRUD
-                JOptionPane.showMessageDialog(this, "Dati salvati con successo!",
-                        "Salvataggio", JOptionPane.INFORMATION_MESSAGE);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Errore durante il salvataggio: " + ex.getMessage(),
-                        "Errore", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        JMenuItem esciMenuItem = new JMenuItem("Esci");
-        esciMenuItem.setAccelerator(KeyStroke.getKeyStroke("ctrl Q"));
-        esciMenuItem.addActionListener(e -> {
-            int conferma = JOptionPane.showConfirmDialog(this,
-                    "Sei sicuro di voler uscire?", "Conferma Uscita", JOptionPane.YES_NO_OPTION);
-            if (conferma == JOptionPane.YES_OPTION) {
-                System.exit(0);
-            }
-        });
-
-        fileMenu.add(nuovoMenuItem);
-        fileMenu.addSeparator();
-        fileMenu.add(salvaMenuItem);
-        fileMenu.addSeparator();
-        fileMenu.add(esciMenuItem);
-        */
-
-
+        
         // Menu Modifica
         JMenu modificaMenu = new JMenu("Modifica");
 

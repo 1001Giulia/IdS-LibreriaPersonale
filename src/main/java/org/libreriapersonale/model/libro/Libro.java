@@ -1,6 +1,7 @@
 package org.libreriapersonale.model.libro;
 
 public class Libro {
+
     private String titolo;
     private String autore;
     private final String isbn;

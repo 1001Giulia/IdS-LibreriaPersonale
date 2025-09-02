@@ -35,7 +35,6 @@ public class LibreriaManager implements Observable {
 
 
     // PATTERN OSBERVER
-
     @Override
     public void addObserver(Observer o) {
         observers.add(o);
