@@ -31,7 +31,7 @@ class LibreriaManagerTest {
     }
 
     @Test
-    @DisplayName("Test per aggiungere un libro e verifica persistenza")
+    @DisplayName("Test pattern builder, aggiunta di un libro e verifica persistenza")
     void testAggiungiLibro() throws IOException {
 
         Libro libro = new Libro.Builder()
@@ -43,23 +43,57 @@ class LibreriaManagerTest {
                 .statoLettura(StatoLettura.COMPLETED)
                 .build();
 
+        // Test builder: campi corretti
+        assertEquals("Titolo", libro.getTitolo());
+        assertEquals("Autore", libro.getAutore());
+        assertEquals("12345", libro.getIsbn());
+        assertEquals(Genere.GIALLO, libro.getGenere());
+        assertEquals(4.5, libro.getRating());
+        assertEquals(StatoLettura.COMPLETED, libro.getStatoLettura());
+
+        
         manager.aggiungiLibro(libro);
 
         // Verifica in memoria
         List<Libro> libri = manager.getLibri();
         assertEquals(1, libri.size());
-        assertEquals("Titolo", libri.get(0).getTitolo());
-        assertEquals("Autore", libri.get(0).getAutore());
-        assertEquals("12345", libri.get(0).getIsbn());
-        assertEquals(Genere.GIALLO, libri.get(0).getGenere());
+        assertEquals("Titolo", libri.getFirst().getTitolo());
+        assertEquals("Autore", libri.getFirst().getAutore());
+        assertEquals("12345", libri.getFirst().getIsbn());
 
         // Verifica persistenza. Creando nuovo repo simulo la riapertura dell'app (ricaricare dati dal file)
         JsonLibroRepository nuovoRepo = new JsonLibroRepository(tempFile.getAbsolutePath());
         List<Libro> libriDB = nuovoRepo.carica();
         assertEquals(1, libriDB.size());
-        assertEquals("Titolo", libriDB.get(0).getTitolo());
+        assertEquals("Titolo", libriDB.getFirst().getTitolo());
 
         assertTrue(libriDB.contains(libro));
+
+        // Test builder: campi obbligatori
+
+        // Test titolo mancante
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Libro.Builder()
+                    .autore("Autore")
+                    .isbn("123")
+                    .build();
+        });
+
+        // Test autore mancante
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Libro.Builder()
+                    .titolo("Titolo")
+                    .isbn("123")
+                    .build();
+        });
+
+        // Test ISBN mancante
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Libro.Builder()
+                    .titolo("Titolo")
+                    .autore("Autore")
+                    .build();
+        });
 
     }
 
@@ -87,11 +121,9 @@ class LibreriaManagerTest {
         assertEquals(0, libriDB.size());
 
         assertFalse(libriDB.contains(libro));
-    }
 
-    @Test
-    @DisplayName("Test eliminazione libro non presente")
-    void testEliminaLibroNonPresente() throws IOException {
+
+
         Libro libroNonPresente = new Libro.Builder()
                 .titolo("???")
                 .autore("?!!")
@@ -105,53 +137,11 @@ class LibreriaManagerTest {
         assertEquals(0, manager.getLibri().size());
 
         // Verifica persistenza
-        JsonLibroRepository nuovoRepo = new JsonLibroRepository(tempFile.getAbsolutePath());
-        List<Libro> libriDB = nuovoRepo.carica();
-        assertEquals(0, libriDB.size());
+        JsonLibroRepository nuovoRepo1 = new JsonLibroRepository(tempFile.getAbsolutePath());
+        List<Libro> libriDB1 = nuovoRepo1.carica();
+        assertEquals(0, libriDB1.size());
 
-        assertFalse(libriDB.contains(libroNonPresente));
-    }
-
-    @Test
-    @DisplayName("Test modifica libro nel manager e persistenza")
-    void testModificaLibro() throws IOException {
-        Libro libroOg = new Libro.Builder()
-                .titolo("Libro 0")
-                .autore("Autore 0")
-                .isbn("701539393")
-                .genere(Genere.FANTASCIENZA)
-                .statoLettura(StatoLettura.PLANTOREAD)
-                .rating(3.0)
-                .build();
-
-        manager.aggiungiLibro(libroOg);
-
-        Libro libroModificato = new Libro.Builder()
-                .titolo("Libro 0")
-                .autore("Autore 0")
-                .isbn("701539393")
-                .genere(Genere.FANTASCIENZA)
-                .statoLettura(StatoLettura.COMPLETED)
-                .rating(5.0)
-                .build();
-
-        manager.modificaLibro(libroModificato);
-
-        // Verifica in memoria
-        List<Libro> libri = manager.getLibri();
-        assertEquals(1, libri.size());
-        assertEquals(5.0, libri.get(0).getRating());
-        assertEquals(StatoLettura.COMPLETED, libri.get(0).getStatoLettura());
-
-        // Verifica persistenza
-        JsonLibroRepository nuovoRepo = new JsonLibroRepository(tempFile.getAbsolutePath());
-        List<Libro> libriDB = nuovoRepo.carica();
-        assertEquals(1, libriDB.size());
-        assertEquals(5.0, libriDB.get(0).getRating());
-        assertEquals(StatoLettura.COMPLETED, libriDB.get(0).getStatoLettura());
-
-        assertEquals(libroModificato.getRating(), libriDB.get(0).getRating());
-        assertEquals(libroModificato.getStatoLettura(), libriDB.get(0).getStatoLettura());
+        assertFalse(libriDB1.contains(libroNonPresente));
     }
 
     @Test
@@ -178,7 +168,7 @@ class LibreriaManagerTest {
         manager.undo();
 
         assertEquals(1, manager.getLibri().size());
-        assertEquals("Libro 1", manager.getLibri().get(0).getTitolo());
+        assertEquals("Libro 1", manager.getLibri().getFirst().getTitolo());
 
         manager.redo();
 
@@ -187,43 +177,65 @@ class LibreriaManagerTest {
     }
 
     @Test
-    @DisplayName("Test Command Pattern - AddLibroCmd")
-    void testAddLibroCommand() {
+    @DisplayName("Test Command Pattern - Add,Edit,Del LibroCmd. Check persistenza dopo l'edit")
+    void testAddDelLibroCommand() throws IOException {
+
+        // Addo
         Libro libro = new Libro.Builder()
-                .titolo("Command Test")
-                .autore("Test Autore")
-                .isbn("888888888")
+                .titolo("Libro 0")
+                .autore("Autore 0")
+                .isbn("701539393")
+                .genere(Genere.FANTASCIENZA)
+                .statoLettura(StatoLettura.PLANTOREAD)
+                .rating(3.0)
                 .build();
 
         Command addCmd = new AddLibroCmd(manager, libro);
-
         addCmd.esegui();
 
         assertEquals(1, manager.getLibri().size());
-        assertEquals("Command Test", manager.getLibri().get(0).getTitolo());
-    }
+        assertEquals("Libro 0", manager.getLibri().getFirst().getTitolo());
 
-    @Test
-    @DisplayName("Test Command Pattern - DelLibroCmd")
-    void testDelLibroCommand() {
-        Libro libro = new Libro.Builder()
-                .titolo("Del Test")
-                .autore("Test Autore")
-                .isbn("999999999")
+
+        // Modifico
+        Libro libroModificato = new Libro.Builder()
+                .titolo("Libro 0")
+                .autore("Autore 0")
+                .isbn("701539393") // Stesso ISBN per poterlo modificare correttamente (metodo in manager)
+                .genere(Genere.FANTASCIENZA)
+                .statoLettura(StatoLettura.COMPLETED) // Campo editato
+                .rating(5.0) // Campo editato
                 .build();
 
-        manager.aggiungiLibro(libro);
-        assertEquals(1, manager.getLibri().size());
+        Command editCmd = new EditLibroCmd(manager, libroModificato);
+        editCmd.esegui();
 
+        // Verifica in memoria
+        List<Libro> libri = manager.getLibri();
+        assertEquals(1, libri.size());
+        assertEquals(5.0, libri.getFirst().getRating());
+        assertEquals(StatoLettura.COMPLETED, libri.getFirst().getStatoLettura());
+
+        // Verifica persistenza
+        JsonLibroRepository nuovoRepo = new JsonLibroRepository(tempFile.getAbsolutePath());
+        List<Libro> libriDB = nuovoRepo.carica();
+        assertEquals(1, libriDB.size());
+        assertEquals(5.0, libriDB.getFirst().getRating());
+        assertEquals(StatoLettura.COMPLETED, libriDB.getFirst().getStatoLettura());
+
+        assertEquals(libroModificato.getRating(), libriDB.getFirst().getRating());
+        assertEquals(libroModificato.getStatoLettura(), libriDB.getFirst().getStatoLettura());
+
+
+        // Elimino
         Command delCmd = new DelLibroCmd(manager, libro);
-
         delCmd.esegui();
 
         assertEquals(0, manager.getLibri().size());
     }
 
     @Test
-    @DisplayName("Test Strategy Pattern - Filtri")
+    @DisplayName("Test Strategy Pattern - Filtri singoli e multipli")
     void testFiltriStrategy() {
         Libro libro1 = new Libro.Builder()
                 .titolo("Libro Fantasy")
@@ -269,24 +281,21 @@ class LibreriaManagerTest {
         FiltroTitolo filtroTitoloFantasy = new FiltroTitolo("Fantasy");
         assertTrue(filtroTitoloFantasy.filtra(libro1));
         assertFalse(filtroTitoloFantasy.filtra(libro2));
-    }
 
+        // Filtri multipli - AND
 
-    @Test
-    @DisplayName("Test Strategy Pattern - Filtro Multiplo (AND)")
-    void testFiltroMultiploAnd() {
-        Libro libro = new Libro.Builder()
+        Libro libroAND = new Libro.Builder()
                 .titolo("Libro 3")
                 .autore("Autore 3")
                 .isbn("123456")
                 .build();
 
-        Filtro filtroTitolo = new FiltroTitolo("Libro 3");
-        Filtro filtroAutore = new FiltroAutore("Autore 3");
+        Filtro filtroTitolo1 = new FiltroTitolo("Libro 3");
+        Filtro filtroAutore1 = new FiltroAutore("Autore 3");
 
-        FiltroMultiplo filtroAnd = new FiltroMultiplo(List.of(filtroTitolo, filtroAutore), true);
+        FiltroMultiplo filtroAnd = new FiltroMultiplo(List.of(filtroTitolo1, filtroAutore1), true);
 
-        assertTrue(filtroAnd.filtra(libro));
+        assertTrue(filtroAnd.filtra(libroAND));
 
         // Libro che non soddisfa filtro titolo
         Libro libroFail = new Libro.Builder()
@@ -296,77 +305,31 @@ class LibreriaManagerTest {
                 .build();
 
         assertFalse(filtroAnd.filtra(libroFail));
-    }
 
-    @Test
-    @DisplayName("Test Strategy Pattern - Filtro Multiplo (OR)")
-    void testFiltroMultiploOr() {
-        Libro libro = new Libro.Builder()
+        // Filtri multipli - OR
+
+        Libro libroOR = new Libro.Builder()
                 .titolo("Libro 4")
                 .autore("Autore 4")
                 .isbn("5151")
                 .build();
 
-        Filtro filtroTitolo = new FiltroTitolo("Libro 4");
-        Filtro filtroAutore = new FiltroAutore("Autore 3");
+        Filtro filtroTitolo2 = new FiltroTitolo("Libro 4");
+        Filtro filtroAutore2 = new FiltroAutore("Autore 3");
 
-        FiltroMultiplo filtroOr = new FiltroMultiplo(List.of(filtroTitolo, filtroAutore), false);
+        FiltroMultiplo filtroOr = new FiltroMultiplo(List.of(filtroTitolo2, filtroAutore2), false);
 
-        assertTrue(filtroOr.filtra(libro));
+        assertTrue(filtroOr.filtra(libroOR));
 
         // Libro che non soddisfa nessun filtro
-        Libro libroFail = new Libro.Builder()
+        Libro libroFail2 = new Libro.Builder()
                 .titolo("A")
                 .autore("B")
                 .isbn("123")
                 .build();
 
-        assertFalse(filtroOr.filtra(libroFail));
-    }
+        assertFalse(filtroOr.filtra(libroFail2));
 
-    @Test
-    @DisplayName("Test Builder Pattern e campi obbligatori")
-    void testLibroBuilder() {
-        // Test costruzione corretta
-        Libro libro = new Libro.Builder()
-                .titolo("Test Titolo")
-                .autore("Test Autore")
-                .isbn("TEST123")
-                .genere(Genere.AZIONE)
-                .rating(4.5)
-                .statoLettura(StatoLettura.READING)
-                .build();
-
-        assertEquals("Test Titolo", libro.getTitolo());
-        assertEquals("Test Autore", libro.getAutore());
-        assertEquals("TEST123", libro.getIsbn());
-        assertEquals(Genere.AZIONE, libro.getGenere());
-        assertEquals(4.5, libro.getRating());
-        assertEquals(StatoLettura.READING, libro.getStatoLettura());
-
-        // Test titolo mancante
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Libro.Builder()
-                    .autore("Test Autore")
-                    .isbn("TEST123")
-                    .build();
-        });
-
-        // Test autore mancante
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Libro.Builder()
-                    .titolo("Test Titolo")
-                    .isbn("TEST123")
-                    .build();
-        });
-
-        // Test ISBN mancante
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Libro.Builder()
-                    .titolo("Test Titolo")
-                    .autore("Test Autore")
-                    .build();
-        });
     }
 
     private static class TestObserver implements Observer {

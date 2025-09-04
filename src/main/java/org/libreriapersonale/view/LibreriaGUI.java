@@ -44,12 +44,13 @@ public class LibreriaGUI extends JFrame implements Observer {
     private JSlider filtroRatingSlider;
     private JLabel filtroRatingLabel;
     private JCheckBox filtroAndCheckbox;
+    private JTextArea testoFiltri;
 
     // Lista completa dei libri (senza filtri)
     private List<Libro> libriCompleti = new ArrayList<>();
 
     // Flag per sapere se ci sono filtri attivi
-    private boolean filtriaAttivi = false;
+    private boolean filtriAttivi = false;
 
     public LibreriaGUI() {
         // Inizializza il manager
@@ -58,7 +59,7 @@ public class LibreriaGUI extends JFrame implements Observer {
         manager.addObserver(this);
 
         inizializzaGUI();
-        update(); // carica i dati iniziali
+        update(); // Carica i dati iniziali
     }
 
     private void inizializzaGUI() {
@@ -361,6 +362,19 @@ public class LibreriaGUI extends JFrame implements Observer {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBorder(BorderFactory.createTitledBorder("Lista Libri"));
 
+        // Indicatore filtri attivi
+        testoFiltri = new JTextArea();
+        testoFiltri.setEditable(false);
+        testoFiltri.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 11));
+        testoFiltri.setBackground(getBackground()); // Sfondo per mimetizzarsi
+        testoFiltri.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        testoFiltri.setVisible(false); // Nascosto all'inizio
+        panel.add(testoFiltri, BorderLayout.NORTH);
+
+        // Fix per quando la finestra è troppo piccola e i filtri sono troppi
+        testoFiltri.setLineWrap(true); // A capo automaticamente
+        testoFiltri.setWrapStyleWord(true); // non spezza le parole
+
         // Modello tabella
         String[] colonne = {"Titolo", "Autore", "ISBN", "Genere", "Stato", "Rating"};
         tableModel = new DefaultTableModel(colonne, 0) {
@@ -432,6 +446,64 @@ public class LibreriaGUI extends JFrame implements Observer {
         filtroDialog.setVisible(true);
     }
 
+    private void aggiornatestoFiltri() {
+        if (!filtriAttivi) {
+            testoFiltri.setVisible(false);
+            return;
+        }
+
+        StringBuilder info = new StringBuilder("[Filtri attivi] ");
+        List<String> filtriAttivi = getStrings();
+
+        if (filtriAttivi.isEmpty()) {
+            testoFiltri.setVisible(false); // Nascondo il testo se nessun filtro è attivo
+        } else {
+            // Unisco i vari filtri
+            for (int i = 0; i < filtriAttivi.size(); i++) {
+                info.append(filtriAttivi.get(i));
+                if (i < filtriAttivi.size() - 1) { // non aggiungo la virgola solo all'ultimo elemento
+                    info.append(", ");
+                }
+            }
+            // si poteva fare con info.append(String.join(", ", filtriAttivi) ops
+
+            if (filtroAndCheckbox != null) {
+                info.append(" (").append(filtroAndCheckbox.isSelected() ? "Tutti i filtri" : "Almeno un filtro").append(")");
+            }
+            testoFiltri.setText(info.toString());
+            testoFiltri.setVisible(true);
+        }
+    }
+
+    private List<String> getStrings() {
+        List<String> filtriAttivi = new ArrayList<>();
+
+        // Controllo se il campo esiste (controllo giusto per sicurezza ma inutile) e contiene del testo (non vuoto, trimmandolo prima)
+        if (filtroTitoloField != null && !filtroTitoloField.getText().trim().isEmpty()) {
+            filtriAttivi.add("Titolo: \"" + filtroTitoloField.getText().trim() + "\"");
+        }
+        if (filtroAutoreField != null && !filtroAutoreField.getText().trim().isEmpty()) {
+            filtriAttivi.add("Autore: \"" + filtroAutoreField.getText().trim() + "\"");
+        }
+        if (filtroGenereCombo != null && filtroGenereCombo.getSelectedItem() != null) {
+            filtriAttivi.add("Genere: " + filtroGenereCombo.getSelectedItem());
+        }
+        if (filtroStatoCombo != null && filtroStatoCombo.getSelectedItem() != null) {
+            filtriAttivi.add("Stato: " + filtroStatoCombo.getSelectedItem());
+        }
+
+        if (filtroRatingSlider != null && filtroRatingSlider.getValue() > 0) { // Rating > 0
+            double rating = filtroRatingSlider.getValue() / 2.0; // Converte 0-10 dello slider in 0-5
+            if (rating == (int) rating) { // se è un numero intero non c'è bisogno di mostrare i decimali
+                filtriAttivi.add("Rating min: " + (int) rating + "/5");
+            } else {
+                filtriAttivi.add("Rating min: " + String.format("%.1f/5", rating));
+            }
+        }
+        return filtriAttivi;
+    }
+
+
     private void applicaFiltri() {
         List<Filtro> filtri = new ArrayList<>();
 
@@ -457,23 +529,19 @@ public class LibreriaGUI extends JFrame implements Observer {
 
         double ratingMin = filtroRatingSlider.getValue() / 2.0;
         if (ratingMin > 0) {
-            filtri.add(new Filtro() {
-                @Override
-                public boolean filtra(Libro libro) {
-                    return libro.getRating() >= ratingMin;
-                }
-            });
+            filtri.add(libro -> libro.getRating() >= ratingMin);
         }
 
         if (filtri.isEmpty()) {
             // Nessun filtro, mostra tutti i libri
-            filtriaAttivi = false;
+            filtriAttivi = false;
             aggiornaTabella(libriCompleti);
+            aggiornatestoFiltri();
             return;
         }
 
         // Applica i filtri
-        filtriaAttivi = true;
+        filtriAttivi = true;
         boolean useAnd = filtroAndCheckbox.isSelected();
         Filtro filtroFinale = new FiltroMultiplo(filtri, useAnd);
 
@@ -485,7 +553,9 @@ public class LibreriaGUI extends JFrame implements Observer {
         }
 
         aggiornaTabella(libriFiltrati);
+        aggiornatestoFiltri();
     }
+
 
     private void azzeraFiltri() {
         if (filtroTitoloField != null) {
@@ -498,8 +568,9 @@ public class LibreriaGUI extends JFrame implements Observer {
             filtroAndCheckbox.setSelected(true);
         }
         // Mostra i libri
-        filtriaAttivi = false;
+        filtriAttivi = false;
         aggiornaTabella(libriCompleti);
+        aggiornatestoFiltri();
     }
 
     private void aggiornaTabella(List<Libro> libri) {
@@ -594,7 +665,7 @@ public class LibreriaGUI extends JFrame implements Observer {
                     .isbn(isbnField.getText().trim())
                     .genere((Genere) genereCombo.getSelectedItem())
                     .statoLettura((StatoLettura) statoCombo.getSelectedItem())
-                    .rating(ratingSlider.getValue() / 2.0) //0-10 dello slider in 0-5
+                    .rating(ratingSlider.getValue() / 2.0) // 0-10 dello slider in 0-5
                     .build();
 
             Command cmd = new AddLibroCmd(manager, libro);
@@ -679,7 +750,7 @@ public class LibreriaGUI extends JFrame implements Observer {
         // Salva la lista completa dei libri
         libriCompleti = new ArrayList<>(manager.getLibri());
         // No filtri attivi -> aggiorna normalmente
-        if (!filtriaAttivi) {
+        if (!filtriAttivi) {
             aggiornaTabella(libriCompleti);
         } else {
             // Riapplica i filtri
