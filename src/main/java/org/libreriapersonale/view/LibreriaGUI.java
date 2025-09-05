@@ -85,7 +85,7 @@ public class LibreriaGUI extends JFrame implements Observer {
         splitPane.setDividerLocation(350);
         add(splitPane, BorderLayout.CENTER);
 
-        pack();
+        pack(); // Compatta automaticamente
         setMinimumSize(new Dimension(500, 400));
         //setSize(800, 600);
         setLocationRelativeTo(null);
@@ -343,13 +343,18 @@ public class LibreriaGUI extends JFrame implements Observer {
         JPanel bottomRow = new JPanel(new FlowLayout());
         editButton = new JButton("Modifica Libro");
         editButton.addActionListener(e -> modificaLibro());
-        editButton.setVisible(false);
+        //editButton.setVisible(false);
+        editButton.setEnabled(false);
+        editButton.setToolTipText("Seleziona un libro da modificare"); // Esce fuori passandoci sopra col mouse
+
         bottomRow.add(editButton);
 
         deleteButton = new JButton("Elimina Libro");
         deleteButton.addActionListener(e -> eliminaLibro());
-        deleteButton.setVisible(false);
+        //deleteButton.setVisible(false);
+        deleteButton.setEnabled(false);
         bottomRow.add(deleteButton);
+        deleteButton.setToolTipText("Seleziona un libro da eliminare");
 
         mainPanel.add(topRow, BorderLayout.NORTH);
         mainPanel.add(bottomRow, BorderLayout.SOUTH);
@@ -400,12 +405,16 @@ public class LibreriaGUI extends JFrame implements Observer {
                     int modelRow = table.convertRowIndexToModel(selectedRow);
                     caricaDatiNelForm(modelRow);
                     // Mostra i bottoni modifica ed elimina
-                    editButton.setVisible(true);
-                    deleteButton.setVisible(true);
+                    // editButton.setVisible(true);
+                    // deleteButton.setVisible(true);
+                    editButton.setEnabled(true);
+                    deleteButton.setEnabled(true);
                 } else {
                     // Nascondi i bottoni quando non c'è selezione
-                    editButton.setVisible(false);
-                    deleteButton.setVisible(false);
+                    //editButton.setVisible(false);
+                    //deleteButton.setVisible(false);
+                    editButton.setEnabled(false);
+                    deleteButton.setEnabled(false);
                 }
             }
         });
@@ -421,6 +430,8 @@ public class LibreriaGUI extends JFrame implements Observer {
         // Creaz finestra per i filtri
         JDialog filtroDialog = new JDialog(this, "Filtri Avanzati", true);
         filtroDialog.setLayout(new BorderLayout());
+
+        filtroDialog.setResizable(false);
 
         // Contenuto finestra
         JPanel filtroPanel = createFiltroPanel();
@@ -441,7 +452,7 @@ public class LibreriaGUI extends JFrame implements Observer {
         buttonPanel.add(cancelButton);
         filtroDialog.add(buttonPanel, BorderLayout.SOUTH);
 
-        filtroDialog.pack();
+        filtroDialog.pack(); // Compatta finestra alle dim minima per le componenti
         filtroDialog.setLocationRelativeTo(this);
         filtroDialog.setVisible(true);
     }
@@ -646,6 +657,7 @@ public class LibreriaGUI extends JFrame implements Observer {
         titoloField.setText((String) tableModel.getValueAt(row, 0));
         autoreField.setText((String) tableModel.getValueAt(row, 1));
         isbnField.setText((String) tableModel.getValueAt(row, 2));
+        isbnField.setEditable(false);
         genereCombo.setSelectedItem(tableModel.getValueAt(row, 3));
         statoCombo.setSelectedItem(tableModel.getValueAt(row, 4));
 
@@ -678,8 +690,8 @@ public class LibreriaGUI extends JFrame implements Observer {
     }
 
     private void modificaLibro() {
-        int selectedRow = table.getSelectedRow(); // Ho tolto il bottone sempre visibile ma lo lascio per sicurezza you never know
-        if (selectedRow < 0) {
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow < 0) { // Ho tolto il bottone sempre visibile ma lo lascio per sicurezza you never know
             JOptionPane.showMessageDialog(this, "Seleziona un libro da modificare.",
                     "Nessuna Selezione", JOptionPane.WARNING_MESSAGE);
             return;
@@ -705,7 +717,7 @@ public class LibreriaGUI extends JFrame implements Observer {
 
     private void eliminaLibro() {
         int selectedRow = table.getSelectedRow();
-        if (selectedRow < 0) {
+        if (selectedRow < 0) { // Anche qua ho tolto il bottone ma okay lo lascio
             JOptionPane.showMessageDialog(this, "Seleziona un libro da eliminare!",
                     "Nessuna Selezione", JOptionPane.WARNING_MESSAGE);
             return;
@@ -714,7 +726,7 @@ public class LibreriaGUI extends JFrame implements Observer {
         // Conferma eliminazione
         int conferma = JOptionPane.showConfirmDialog(this,
                 "Sei sicuro di voler eliminare questo libro?",
-                "Conferma Eliminazione", JOptionPane.YES_NO_OPTION);
+                "Conferma Eliminazione", JOptionPane.YES_NO_OPTION,JOptionPane.PLAIN_MESSAGE,null);
 
         if (conferma == JOptionPane.YES_OPTION) {
             // Indice vista -> indice modello
@@ -733,14 +745,17 @@ public class LibreriaGUI extends JFrame implements Observer {
         titoloField.setText("");
         autoreField.setText("");
         isbnField.setText("");
+        isbnField.setEditable(true);
         genereCombo.setSelectedItem(Genere.ALTRO);
         statoCombo.setSelectedItem(StatoLettura.READING);
         ratingSlider.setValue(0);
         ratingLabel.setText("0/5");
         table.clearSelection();
         // Nascondi bottoni
-        editButton.setVisible(false);
-        deleteButton.setVisible(false);
+        //editButton.setVisible(false);
+        //deleteButton.setVisible(false);
+        deleteButton.setEnabled(false);
+        editButton.setEnabled(false);
     }
 
     // Observer
@@ -753,7 +768,7 @@ public class LibreriaGUI extends JFrame implements Observer {
             aggiornaTabella(libriCompleti);
         } else {
             // Riapplica i filtri
-            applicaFiltri();
+            applicaFiltri(); // E faccio aggiornaTabella con i libri filtrati
         }
     }
 
