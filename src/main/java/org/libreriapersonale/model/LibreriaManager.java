@@ -92,6 +92,9 @@ public class LibreriaManager implements Observable {
     // CRUD
     public void aggiungiLibro(Libro libro) {
         salvaStato();
+        if (libri.contains(libro)) {
+            throw new IllegalArgumentException("Un libro con lo stesso ISBN è già presente nella libreria.");
+        }
         try {
             libri.add(libro);
             repository.salva(libri);
@@ -205,8 +208,11 @@ public class LibreriaManager implements Observable {
             notifyObservers();
         }
 
+
     }
 }
+
+
 
 
 

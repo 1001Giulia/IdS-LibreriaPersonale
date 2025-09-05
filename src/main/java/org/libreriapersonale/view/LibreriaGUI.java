@@ -446,7 +446,7 @@ public class LibreriaGUI extends JFrame implements Observer {
         filtroDialog.setVisible(true);
     }
 
-    private void aggiornatestoFiltri() {
+    private void aggiornaTestoFiltri() {
         if (!filtriAttivi) {
             testoFiltri.setVisible(false);
             return;
@@ -536,7 +536,7 @@ public class LibreriaGUI extends JFrame implements Observer {
             // Nessun filtro, mostra tutti i libri
             filtriAttivi = false;
             aggiornaTabella(libriCompleti);
-            aggiornatestoFiltri();
+            aggiornaTestoFiltri();
             return;
         }
 
@@ -553,7 +553,7 @@ public class LibreriaGUI extends JFrame implements Observer {
         }
 
         aggiornaTabella(libriFiltrati);
-        aggiornatestoFiltri();
+        aggiornaTestoFiltri();
     }
 
 
@@ -570,7 +570,7 @@ public class LibreriaGUI extends JFrame implements Observer {
         // Mostra i libri
         filtriAttivi = false;
         aggiornaTabella(libriCompleti);
-        aggiornatestoFiltri();
+        aggiornaTestoFiltri();
     }
 
     private void aggiornaTabella(List<Libro> libri) {
@@ -672,9 +672,8 @@ public class LibreriaGUI extends JFrame implements Observer {
             cmd.esegui();
             azzeraCampi();
 
-        } catch (IllegalArgumentException e) {
-            JOptionPane.showMessageDialog(this, "Errore: " + e.getMessage(),
-                    "Errore Validazione", JOptionPane.ERROR_MESSAGE);
+        } catch (IllegalArgumentException e) { // Gestisce pure l'eccezione di libro duplicato, oltre a quelle nel builder
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Errore", JOptionPane.ERROR_MESSAGE);
         }
     }
 
