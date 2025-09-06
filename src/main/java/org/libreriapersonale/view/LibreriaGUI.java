@@ -13,6 +13,7 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class LibreriaGUI extends JFrame implements Observer {
 
@@ -116,6 +117,7 @@ public class LibreriaGUI extends JFrame implements Observer {
         apriFiltriMenuItem.addActionListener(e -> apriFinestraFiltri());
 
         JMenuItem azzeraFiltriMenuItem = new JMenuItem("Azzera Filtri");
+        azzeraFiltriMenuItem.setAccelerator(KeyStroke.getKeyStroke("ctrl R"));
         azzeraFiltriMenuItem.addActionListener(e -> azzeraFiltri());
 
         filtriMenu.add(apriFiltriMenuItem);
@@ -202,7 +204,7 @@ public class LibreriaGUI extends JFrame implements Observer {
             if (rating == (int) rating) { // se intero
                 filtroRatingLabel.setText(String.format("%d/5", (int) rating));
             } else {
-                filtroRatingLabel.setText(String.format("%.1f/5", rating));
+                filtroRatingLabel.setText(String.format(Locale.US, "%.1f/5", rating)); // Preferenza personale, punto ai decimali
             }
         });
 
@@ -309,7 +311,7 @@ public class LibreriaGUI extends JFrame implements Observer {
                 // Senza decimali se è intero
                 ratingLabel.setText(String.format("%d/5", (int) rating));
             } else {
-                ratingLabel.setText(String.format("%.1f/5", rating));
+                ratingLabel.setText(String.format(Locale.US, "%.1f/5", rating));
             }
         });
         ratingPanel.add(ratingSlider);
@@ -401,7 +403,7 @@ public class LibreriaGUI extends JFrame implements Observer {
             if (!e.getValueIsAdjusting()) { // evita doppie chiamate              // Selection model gestisce quale riga è selez
                 int selectedRow = table.getSelectedRow();                         // Quando cambia la selezione viene eseguito questo blocco
                 if (selectedRow >= 0) { // Con questo verifico se qualcosa è stato selezionato (table.get.. res -1 se non c'è selez)
-                    // Converti l'indice della vista nell'indice del modello
+                    // Converti l'indice della vista (gui) nell'indice del modello (dati)
                     int modelRow = table.convertRowIndexToModel(selectedRow);
                     caricaDatiNelForm(modelRow);
                     // Mostra i bottoni modifica ed elimina
@@ -409,12 +411,14 @@ public class LibreriaGUI extends JFrame implements Observer {
                     // deleteButton.setVisible(true);
                     editButton.setEnabled(true);
                     deleteButton.setEnabled(true);
+                    addButton.setEnabled(false);
                 } else {
                     // Nascondi i bottoni quando non c'è selezione
                     //editButton.setVisible(false);
                     //deleteButton.setVisible(false);
                     editButton.setEnabled(false);
                     deleteButton.setEnabled(false);
+                    addButton.setEnabled(true);
                 }
             }
         });
@@ -508,7 +512,7 @@ public class LibreriaGUI extends JFrame implements Observer {
             if (rating == (int) rating) { // se è un numero intero non c'è bisogno di mostrare i decimali
                 filtriAttivi.add("Rating min: " + (int) rating + "/5");
             } else {
-                filtriAttivi.add("Rating min: " + String.format("%.1f/5", rating));
+                filtriAttivi.add("Rating min: " + String.format(Locale.US, "%.1f/5", rating));
             }
         }
         return filtriAttivi;
@@ -569,6 +573,7 @@ public class LibreriaGUI extends JFrame implements Observer {
 
 
     private void azzeraFiltri() {
+
         if (filtroTitoloField != null) {
             filtroTitoloField.setText("");
             filtroAutoreField.setText("");
@@ -578,6 +583,15 @@ public class LibreriaGUI extends JFrame implements Observer {
             filtroRatingLabel.setText("0/5");
             filtroAndCheckbox.setSelected(true);
         }
+
+        // Pulisci la selezione prima di aggiornare
+        // table.clearSelection();
+        // Il TableRowSorter si aspetta sempre tutti i dati, ma modifico direttamente il DefaultTableMOodel
+        // quindi non trova più per esempio il 5o elemento dopo aver filtrato
+        // Inoltre facendo così disabilito i tasti di modifica ed elimina
+
+        // Non serve più ho fixato direttamente aggiornaTabella, gestisce la selezione (mantiene la selez se c'è ancora)
+
         // Mostra i libri
         filtriAttivi = false;
         aggiornaTabella(libriCompleti);
@@ -585,6 +599,14 @@ public class LibreriaGUI extends JFrame implements Observer {
     }
 
     private void aggiornaTabella(List<Libro> libri) {
+        // Salva la selezione corrente (se presente)
+        int selectedRow = table.getSelectedRow();
+        String selectedIsbn = null;
+        if (selectedRow >= 0) {
+            int modelRow = table.convertRowIndexToModel(selectedRow);
+            selectedIsbn = (String) tableModel.getValueAt(modelRow, 2);
+        }
+
         tableModel.setRowCount(0);
         for (Libro libro : libri) {
             Object[] row = {
@@ -596,6 +618,20 @@ public class LibreriaGUI extends JFrame implements Observer {
                     libro.getRating()
             };
             tableModel.addRow(row);
+        }
+
+        // Ripristina la selezione se il libro è ancora presente
+        if (selectedIsbn != null) {
+            for (int i = 0; i < tableModel.getRowCount(); i++) {
+                if (selectedIsbn.equals(tableModel.getValueAt(i, 2))) {
+                    // Conversione indice modello (dati) -> indice vista (ciò che vede l'utente)
+                    int viewRow = table.convertRowIndexToView(i);
+                    if (viewRow >= 0) {
+                        table.setRowSelectionInterval(viewRow, viewRow);
+                    }
+                    break;
+                }
+            }
         }
     }
 

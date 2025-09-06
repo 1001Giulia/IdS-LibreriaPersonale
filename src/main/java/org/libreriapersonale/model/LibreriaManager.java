@@ -60,7 +60,7 @@ public class LibreriaManager implements Observable {
 
     public void undo() {
         if (!undohistory.isEmpty()) {
-            redohistory.push(new MementoLibri(libri)); //passo i libri correnti facendo copia profonda ecc e poi salva in stack redo
+            redohistory.push(new MementoLibri(libri)); // passo i libri correnti facendo copia profonda ecc e poi salva in stack redo
             MementoLibri prev = undohistory.pop();
             libri.clear();
             libri.addAll(prev.getLibri());
