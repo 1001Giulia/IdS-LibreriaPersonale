@@ -356,3 +356,5 @@ class LibreriaManagerTest {
         assertEquals(2, observer.updateCount);
     }
 }
+
+

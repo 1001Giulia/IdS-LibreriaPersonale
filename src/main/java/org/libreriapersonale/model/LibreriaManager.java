@@ -88,7 +88,6 @@ public class LibreriaManager implements Observable {
         }
     }
 
-
     // CRUD
     public void aggiungiLibro(Libro libro) {
         salvaStato();
@@ -136,40 +135,6 @@ public class LibreriaManager implements Observable {
         }
     }
 
-    // fare un metodo di salvataggio privato per non scrivere tutte le volte try catch (?)
-
-    /* in caso si può fare una cosa del genere al posto delle string ogni volta ma vabbe
-    private void msgErrore(String op, Exception e) {
-        String mes = "Errore durante " + op + ": " + e.getMessage();
-        System.err.println(mes);
-    }
-    */
-
-
-    // RICERCA LIBRI
-    /* sostituiti con strategy
-    public List<Libro> cercaPerTitolo(String titolo) {
-        List<Libro> ret = new ArrayList<>();
-        for (Libro libro : libri) {
-            if (libro.getTitolo().toLowerCase().contains(titolo.toLowerCase())) {
-                ret.add(libro);
-            }
-        }
-        return ret;
-    }
-
-    public List<Libro> cercaPerAutore(String autore) {
-        List<Libro> ret = new ArrayList<>();
-        for (Libro libro : libri) {
-            if (libro.getAutore().toLowerCase().contains(autore.toLowerCase())) {
-                ret.add(libro);
-            }
-        }
-        return ret;
-    }
-    */
-
-
     public Libro cercaPerIsbn(String isbn) {
         for (Libro libro : libri) {
             if (libro.getIsbn().equals(isbn)) {
@@ -178,7 +143,6 @@ public class LibreriaManager implements Observable {
         }
         return null;
     }
-
 
     // GETTERS E SETTERS
     public List<Libro> getLibri() {

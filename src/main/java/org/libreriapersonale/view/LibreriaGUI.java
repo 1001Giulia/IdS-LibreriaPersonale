@@ -63,6 +63,20 @@ public class LibreriaGUI extends JFrame implements Observer {
         update(); // Carica i dati iniziali
     }
 
+    // Observer
+    @Override
+    public void update() {
+        // Salva la lista completa dei libri
+        libriCompleti = new ArrayList<>(manager.getLibri());
+        // No filtri attivi -> aggiorna normalmente
+        if (!filtriAttivi) {
+            aggiornaTabella(libriCompleti);
+        } else {
+            // Riapplica i filtri
+            applicaFiltri(); // E faccio aggiornaTabella con i libri filtrati
+        }
+    }
+
     private void inizializzaGUI() {
         setTitle("Libreria Personale");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -515,7 +529,6 @@ public class LibreriaGUI extends JFrame implements Observer {
         return filtriAttivi;
     }
 
-
     private void applicaFiltri() {
         List<Filtro> filtri = new ArrayList<>();
 
@@ -567,7 +580,6 @@ public class LibreriaGUI extends JFrame implements Observer {
         aggiornaTabella(libriFiltrati);
         aggiornaTestoFiltri();
     }
-
 
     private void azzeraFiltri() {
 
@@ -791,26 +803,4 @@ public class LibreriaGUI extends JFrame implements Observer {
         editButton.setEnabled(false);
     }
 
-    // Observer
-    @Override
-    public void update() {
-        // Salva la lista completa dei libri
-        libriCompleti = new ArrayList<>(manager.getLibri());
-        // No filtri attivi -> aggiorna normalmente
-        if (!filtriAttivi) {
-            aggiornaTabella(libriCompleti);
-        } else {
-            // Riapplica i filtri
-            applicaFiltri(); // E faccio aggiornaTabella con i libri filtrati
-        }
-    }
-
-
-    /*
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new LibreriaGUI().setVisible(true);
-        });
-    }
-    */
 }

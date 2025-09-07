@@ -14,6 +14,4 @@ public class FiltroGenere implements Filtro{
     public boolean filtra(Libro libro) {
         return genere != null && genere.equals(libro.getGenere());
     }
-
-
 }
