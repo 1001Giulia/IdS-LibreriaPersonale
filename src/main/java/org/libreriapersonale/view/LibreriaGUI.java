@@ -87,7 +87,7 @@ public class LibreriaGUI extends JFrame implements Observer {
         add(splitPane, BorderLayout.CENTER);
 
         pack(); // Compatta automaticamente
-        setMinimumSize(new Dimension(500, 400));
+        setMinimumSize(new Dimension(1000, 400));
         //setSize(800, 600);
         setLocationRelativeTo(null);
     }
@@ -221,13 +221,10 @@ public class LibreriaGUI extends JFrame implements Observer {
         gbc.gridx = 3;
         JPanel buttonFiltroPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
 
-        JButton applicaFiltroBtn = new JButton("Applica Filtri");
-        applicaFiltroBtn.addActionListener(e -> applicaFiltri());
 
         JButton azzeraFiltroBtn = new JButton("Azzera Filtri");
         azzeraFiltroBtn.addActionListener(e -> azzeraFiltri());
 
-        buttonFiltroPanel.add(applicaFiltroBtn);
         buttonFiltroPanel.add(azzeraFiltroBtn);
         panel.add(buttonFiltroPanel, gbc);
 
