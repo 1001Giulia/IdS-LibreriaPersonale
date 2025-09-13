@@ -9,6 +9,7 @@ public class FiltroAutore implements Filtro {
         this.autore = autore.toLowerCase();
     }
 
+    @Override
     public boolean filtra(Libro libro) {
         return autore != null && libro.getAutore() != null &&
                libro.getAutore().toLowerCase().contains(autore);
